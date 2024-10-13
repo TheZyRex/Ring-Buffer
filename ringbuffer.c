@@ -5,9 +5,8 @@
  * Implementation of ring buffer functions.
  */
 
-void ring_buffer_init(ring_buffer_t *buffer, char *buf, size_t buf_size) {
+void ring_buffer_init(ring_buffer_t *buffer, size_t buf_size) {
   RING_BUFFER_ASSERT(RING_BUFFER_IS_POWER_OF_TWO(buf_size) == 1);
-  buffer->buffer = buf;
   buffer->buffer_mask = buf_size - 1;
   buffer->tail_index = 0;
   buffer->head_index = 0;
@@ -17,8 +16,8 @@ void ring_buffer_queue(ring_buffer_t *buffer, char data) {
   /* Is buffer full? */
   if(ring_buffer_is_full(buffer)) {
     /* Is going to overwrite the oldest byte */
-    /* Increase tail index */
-    buffer->tail_index = ((buffer->tail_index + 1) & RING_BUFFER_MASK(buffer));
+    /* busy-wait for it to be read */
+    while (ring_buffer_is_full(buffer)) {;}
   }
 
   /* Place data in buffer */
@@ -75,4 +74,3 @@ uint8_t ring_buffer_peek(ring_buffer_t *buffer, char *data, ring_buffer_size_t i
 extern inline uint8_t ring_buffer_is_empty(ring_buffer_t *buffer);
 extern inline uint8_t ring_buffer_is_full(ring_buffer_t *buffer);
 extern inline ring_buffer_size_t ring_buffer_num_items(ring_buffer_t *buffer);
-

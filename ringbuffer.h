@@ -49,14 +49,17 @@ typedef struct ring_buffer_t ring_buffer_t;
  * as well as metadata for the ring buffer.
  */
 struct ring_buffer_t {
-  /** Buffer memory. */
-  char *buffer;
   /** Buffer mask. */
-  ring_buffer_size_t buffer_mask;
+  ring_buffer_size_t buffer_mask;           // 8 Byte
+
   /** Index of tail. */
-  ring_buffer_size_t tail_index;
+  volatile ring_buffer_size_t tail_index;   // 8 Byte
+
   /** Index of head. */
-  ring_buffer_size_t head_index;
+  volatile ring_buffer_size_t head_index;   // 8 Byte
+
+  /** flexible buffer memory. */
+  char buffer[];
 };
 
 /**
@@ -64,10 +67,9 @@ struct ring_buffer_t {
  * This function can also be used to empty/reset the buffer.
  * The resulting buffer can contain <em>buf_size-1</em> bytes.
  * @param buffer The ring buffer to initialize.
- * @param buf The buffer allocated for the ringbuffer.
  * @param buf_size The size of the allocated ringbuffer.
  */
-void ring_buffer_init(ring_buffer_t *buffer, char *buf, size_t buf_size);
+void ring_buffer_init(ring_buffer_t *buffer, size_t buf_size);
 
 /**
  * Adds a byte to a ring buffer.
